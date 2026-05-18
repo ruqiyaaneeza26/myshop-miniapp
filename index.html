@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ur" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>MyShop 🛍️</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --card: #161616;
+    --border: #2a2a2a;
+    --gold: #c9a84c;
+    --gold2: #f0d080;
+    --text: #f5f5f0;
+    --muted: #888;
+    --green: #4caf7d;
+    --red: #e05c5c;
+    --radius: 18px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; padding: 20px 16px 100px; animation: fadeIn 0.3s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ── HEADER ── */
+  .header {
+    text-align: center;
+    padding: 28px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .header .logo { font-size: 36px; margin-bottom: 6px; }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+  .header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+  /* ── PRODUCT CARD ── */
+  .product-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+    cursor: pointer;
+  }
+  .product-card:active { transform: scale(0.98); }
+  .product-card:hover { border-color: var(--gold); }
+
+  .product-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 72px;
+    position: relative;
+    overflow: hidden;
+  }
+  .product-img::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.6) 100%);
+  }
+
+  .product-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--gold);
+    color: #000;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    z-index: 2;
+    letter-spacing: 0.5px;
+  }
+
+  .product-info { padding: 16px; }
+  .product-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .product-desc { color: var(--muted); font-size: 13px; line-height: 1.6; margin-bottom: 14px; }
+
+  .product-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .product-price {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+  .product-price span { font-size: 13px; color: var(--muted); font-weight: 400; }
+
+  .btn-order {
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 22px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .btn-order:active { transform: scale(0.95); opacity: 0.85; }
+
+  /* ── ORDER FORM ── */
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--gold);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 20px;
+    width: fit-content;
+  }
+  .back-btn:active { opacity: 0.7; }
+
+  .selected-product {
+    background: linear-gradient(135deg, #1a160a, #201a08);
+    border: 1px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+  .selected-product .sp-emoji { font-size: 38px; }
+  .selected-product .sp-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .selected-product .sp-price { color: var(--gold); font-size: 15px; font-weight: 600; margin-top: 2px; }
+
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    margin-top: 18px;
+  }
+  .form-input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--gold); }
+  .form-input::placeholder { color: #555; }
+
+  .order-summary-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+  }
+  .order-summary-box h3 {
+    font-size: 13px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    padding: 6px 0;
+    border-bottom: 1px solid #1e1e1e;
+  }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row.total { font-weight: 700; font-size: 16px; color: var(--gold); margin-top: 4px; }
+
+  .btn-confirm {
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: #000;
+    border: none;
+    border-radius: 14px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .btn-confirm:active { transform: scale(0.98); }
+  .btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── SUCCESS ── */
+  #screen-success {
+    display: none;
+    text-align: center;
+    padding-top: 80px;
+  }
+  #screen-success.active { display: block; }
+  .success-icon { font-size: 72px; margin-bottom: 20px; animation: pop 0.5s ease; }
+  @keyframes pop { 0% { transform: scale(0); } 80% { transform: scale(1.15); } 100% { transform: scale(1); } }
+  .success-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 900;
+    margin-bottom: 10px;
+    color: var(--green);
+  }
+  .success-msg { color: var(--muted); font-size: 15px; line-height: 1.7; }
+  .order-id-badge {
+    display: inline-block;
+    background: #0d1f0d;
+    border: 1px solid var(--green);
+    color: var(--green);
+    border-radius: 30px;
+    padding: 8px 22px;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 20px 0;
+    letter-spacing: 1px;
+  }
+
+  /* ── LOADING ── */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .loading-overlay.show { display: flex; }
+  .spinner {
+    width: 44px; height: 44px;
+    border: 3px solid #333;
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: var(--muted); font-size: 14px; }
+
+  /* ── ERROR ── */
+  .error-msg {
+    background: #1f0d0d;
+    border: 1px solid var(--red);
+    color: var(--red);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+  }
+  .error-msg.show { display: block; }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Order place ho raha hai...</div>
+</div>
+
+<!-- SCREEN 1: CATALOG -->
+<div class="screen active" id="screen-catalog">
+  <div class="header">
+    <div class="logo">🛍️</div>
+    <h1>MyShop</h1>
+    <p>Premium products, fast delivery</p>
+  </div>
+
+  <!-- Product A -->
+  <div class="product-card" onclick="selectProduct('A')">
+    <div class="product-img" style="background: linear-gradient(135deg, #1a0a2e, #2d1060);">
+      🌸
+      <div class="product-badge">BESTSELLER</div>
+    </div>
+    <div class="product-info">
+      <div class="product-name">Rose Perfume</div>
+      <div class="product-desc">Meethi aur lasting khushbu. French rose attar se banaya gaya. Ek spray poore din chalti hai.</div>
+      <div class="product-footer">
+        <div class="product-price">Rs. 500 <span>+ Rs. 100 delivery</span></div>
+        <button class="btn-order" onclick="event.stopPropagation(); selectProduct('A')">Order Karo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product B -->
+  <div class="product-card" onclick="selectProduct('B')">
+    <div class="product-img" style="background: linear-gradient(135deg, #0a1a1a, #0d3030);">
+      🌊
+      <div class="product-badge" style="background:#4fc3f7; color:#000;">NEW</div>
+    </div>
+    <div class="product-info">
+      <div class="product-name">Ocean Oud Spray</div>
+      <div class="product-desc">Mardana khushbu with deep oud notes. Fresh ocean breeze ke saath. Office aur evening ke liye perfect.</div>
+      <div class="product-footer">
+        <div class="product-price">Rs. 750 <span>+ Rs. 100 delivery</span></div>
+        <button class="btn-order" onclick="event.stopPropagation(); selectProduct('B')">Order Karo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product C -->
+  <div class="product-card" onclick="selectProduct('C')">
+    <div class="product-img" style="background: linear-gradient(135deg, #1a1200, #3d2c00);">
+      👑
+      <div class="product-badge" style="background: linear-gradient(135deg,#c9a84c,#f0d080); color:#000;">DELUXE</div>
+    </div>
+    <div class="product-info">
+      <div class="product-name">Royal Gold Attar</div>
+      <div class="product-desc">Luxury collection ka sabse umdah perfume. Sona aur ambar ki khushbu. Special occasions ke liye.</div>
+      <div class="product-footer">
+        <div class="product-price">Rs. 1000 <span>+ Rs. 100 delivery</span></div>
+        <button class="btn-order" onclick="event.stopPropagation(); selectProduct('C')">Order Karo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: ORDER FORM -->
+<div class="screen" id="screen-order">
+  <div class="back-btn" onclick="goBack()">← Wapas Jao</div>
+
+  <div class="selected-product" id="selectedProductBox">
+    <div class="sp-emoji" id="spEmoji">🌸</div>
+    <div>
+      <div class="sp-name" id="spName">Rose Perfume</div>
+      <div class="sp-price" id="spPrice">Rs. 500</div>
+    </div>
+  </div>
+
+  <label class="form-label">Apna Naam 👤</label>
+  <input class="form-input" type="text" id="inputNaam" placeholder="Jaise: Riya, Ali, Sara..." autocomplete="name"/>
+
+  <label class="form-label">Phone Number 📞</label>
+  <input class="form-input" type="tel" id="inputPhone" placeholder="03XX-XXXXXXX" autocomplete="tel"/>
+
+  <label class="form-label">Delivery Address 📍</label>
+  <input class="form-input" type="text" id="inputAddress" placeholder="Jaise: House 5, Block B, Karachi" autocomplete="street-address"/>
+
+  <div class="order-summary-box" id="summaryBox">
+    <h3>Order Summary</h3>
+    <div class="summary-row"><span>Product</span><span id="sumProduct">—</span></div>
+    <div class="summary-row"><span>Price</span><span id="sumPrice">—</span></div>
+    <div class="summary-row"><span>Delivery</span><span>Rs. 100</span></div>
+    <div class="summary-row total"><span>Total</span><span id="sumTotal">—</span></div>
+  </div>
+
+  <div class="error-msg" id="errorMsg">⚠️ Sab fields bharein please!</div>
+
+  <button class="btn-confirm" id="btnConfirm" onclick="placeOrder()">
+    ✅ Order Confirm Karein
+  </button>
+</div>
+
+<!-- SCREEN 3: SUCCESS -->
+<div class="screen" id="screen-success">
+  <div class="success-icon">🎉</div>
+  <div class="success-title">Order Ho Gaya!</div>
+  <div class="order-id-badge" id="successOrderId">#0000</div>
+  <div class="success-msg">
+    Aapka order receive ho gaya hai.<br/>
+    Jald hi delivery ho gi. Shukriya! 🌟
+  </div>
+</div>
+
+<script>
+// ── CONFIG ── Replace with your actual n8n webhook URL after setup
+const WEBHOOK_URL = 'YOUR_N8N_WEBHOOK_URL_HERE';
+
+const PRODUCTS = {
+  A: { name: 'Rose Perfume',     emoji: '🌸', price: 500  },
+  B: { name: 'Ocean Oud Spray',  emoji: '🌊', price: 750  },
+  C: { name: 'Royal Gold Attar', emoji: '👑', price: 1000 }
+};
+
+let selectedProduct = null;
+let tg = null;
+
+// Init Telegram Web App
+try {
+  tg = window.Telegram.WebApp;
+  tg.ready();
+  tg.expand();
+  tg.setHeaderColor('#0d0d0d');
+  tg.setBackgroundColor('#0d0d0d');
+} catch(e) {
+  console.log('Not in Telegram, running in browser mode');
+}
+
+function getChatId() {
+  try {
+    return tg?.initDataUnsafe?.user?.id || null;
+  } catch(e) { return null; }
+}
+
+function selectProduct(key) {
+  selectedProduct = key;
+  const p = PRODUCTS[key];
+  document.getElementById('spEmoji').textContent = p.emoji;
+  document.getElementById('spName').textContent = p.name;
+  document.getElementById('spPrice').textContent = `Rs. ${p.price}`;
+  document.getElementById('sumProduct').textContent = `Product ${key} — ${p.name}`;
+  document.getElementById('sumPrice').textContent = `Rs. ${p.price}`;
+  document.getElementById('sumTotal').textContent = `Rs. ${p.price + 100}`;
+  showScreen('screen-order');
+  window.scrollTo(0, 0);
+}
+
+function goBack() {
+  showScreen('screen-catalog');
+  document.getElementById('errorMsg').classList.remove('show');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+async function placeOrder() {
+  const naam    = document.getElementById('inputNaam').value.trim();
+  const phone   = document.getElementById('inputPhone').value.trim();
+  const address = document.getElementById('inputAddress').value.trim();
+  const err     = document.getElementById('errorMsg');
+
+  if (!naam || !phone || !address) {
+    err.classList.add('show');
+    return;
+  }
+  err.classList.remove('show');
+
+  const p = PRODUCTS[selectedProduct];
+  const orderId = Math.floor(Math.random() * 9000) + 1000;
+  const chatId  = getChatId();
+
+  const payload = {
+    chatId,
+    orderId,
+    customerName: naam,
+    phone,
+    orderItem: selectedProduct,
+    productName: p.name,
+    orderAddress: address,
+    Price: p.price,
+    Delivery: 100,
+    Total: p.price + 100,
+    source: 'mini_app'
+  };
+
+  document.getElementById('loadingOverlay').classList.add('show');
+  document.getElementById('btnConfirm').disabled = true;
+
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) {
+    console.log('Webhook error (or test mode):', e);
+  }
+
+  document.getElementById('loadingOverlay').classList.remove('show');
+  document.getElementById('successOrderId').textContent = `#${orderId}`;
+  showScreen('screen-success');
+
+  // Close Mini App after 3 seconds
+  setTimeout(() => {
+    try { tg?.close(); } catch(e) {}
+  }, 3000);
+}
+</script>
+</body>
+</html>
