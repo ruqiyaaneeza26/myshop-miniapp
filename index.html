@@ -520,5 +520,30 @@ async function placeOrder() {
   }, 3000);
 }
 </script>
+  async function placeOrder() {
+  const orderData = {
+    chatId: "7402783350",        // In real case: customer's Telegram ID
+    orderId: Date.now().toString(),
+    customerName: document.getElementById("name")?.value || "Test Customer",
+    phone: document.getElementById("phone")?.value || "03001234567",
+    orderAddress: document.getElementById("address")?.value || "Test Address",
+    productName: "Ocean Oud Spray",
+    Price: "750",
+    Delivery: "100",
+    Total: "850"
+  };
+
+  const response = await fetch("https://n8n.gadgetronics.pk/webhook/miniapp-order", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(orderData)
+  });
+
+  if (response.ok) {
+    alert("✅ Order confirmed! Check Telegram.");
+  } else {
+    alert("❌ Order failed. Try again.");
+  }
+}
 </body>
 </html>
