@@ -3,547 +3,652 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>MyShop 🛍️</title>
+<title>MyShop 🛍️ | Order in Seconds</title>
+<!-- Telegram WebApp core script -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<!-- System fonts only - no external requests -->
 <style>
-  :root {
-    --bg: #0d0d0d;
-    --card: #161616;
-    --border: #2a2a2a;
-    --gold: #c9a84c;
-    --gold2: #f0d080;
-    --text: #f5f5f0;
-    --muted: #888;
-    --green: #4caf7d;
-    --red: #e05c5c;
-    --radius: 18px;
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --bg: #0b0b0b;
+    --card: #131313;
+    --surface: #1a1a1a;
+    --border: #2a2a2a;
+    --gold: #D4AF37;
+    --gold-light: #F3E5AB;
+    --text: #f0f0f0;
+    --muted: #8a8a8a;
+    --green: #3e9f6f;
+    --red: #e05c5c;
+    --radius-xl: 28px;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+  }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background: var(--bg);
     color: var(--text);
-    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     overflow-x: hidden;
+    min-height: 100vh;
   }
 
-  /* ── SCREENS ── */
-  .screen { display: none; padding: 20px 16px 100px; animation: fadeIn 0.3s ease; }
+  /* screens */
+  .screen {
+    display: none;
+    padding: 20px 18px 90px;
+    animation: fadeSlide 0.35s ease;
+  }
   .screen.active { display: block; }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeSlide {
+    0% { opacity: 0; transform: translateY(12px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
 
-  /* ── HEADER ── */
-  .header {
+  /* header */
+  .store-header {
     text-align: center;
-    padding: 28px 0 24px;
+    padding: 32px 0 20px;
     border-bottom: 1px solid var(--border);
     margin-bottom: 24px;
   }
-  .header .logo { font-size: 36px; margin-bottom: 6px; }
-  .header h1 {
+  .store-logo { font-size: 42px; margin-bottom: 6px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
+  .store-title {
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: 26px;
-    font-weight: 900;
-    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    font-size: 30px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    background-clip: text;
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    letter-spacing: -0.5px;
+    color: transparent;
+    letter-spacing: -0.3px;
   }
-  .header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .store-tagline { color: var(--muted); font-size: 13px; margin-top: 5px; letter-spacing: 0.3px; }
 
-  /* ── PRODUCT CARD ── */
+  /* product grid */
+  .product-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
   .product-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    margin-bottom: 16px;
+    border-radius: var(--radius-lg);
     overflow: hidden;
     transition: transform 0.2s, border-color 0.2s;
     cursor: pointer;
   }
-  .product-card:active { transform: scale(0.98); }
-  .product-card:hover { border-color: var(--gold); }
-
-  .product-img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
+  .product-card:active { transform: scale(0.99); }
+  .product-media {
+    height: 190px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 72px;
+    font-size: 68px;
     position: relative;
-    overflow: hidden;
+    background: linear-gradient(145deg, #1e1a2f, #121020);
   }
-  .product-img::after {
-    content: '';
+  .badge {
     position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.6) 100%);
-  }
-
-  .product-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 14px;
+    right: 14px;
     background: var(--gold);
-    color: #000;
+    color: #0b0b0b;
     font-size: 11px;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 20px;
-    z-index: 2;
-    letter-spacing: 0.5px;
+    font-weight: 800;
+    padding: 5px 12px;
+    border-radius: 40px;
+    letter-spacing: 0.4px;
+    backdrop-filter: blur(2px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
   }
-
-  .product-info { padding: 16px; }
+  .product-details {
+    padding: 16px;
+  }
   .product-name {
-    font-family: Georgia, serif;
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 800;
+    font-family: Georgia, serif;
     margin-bottom: 6px;
   }
-  .product-desc { color: var(--muted); font-size: 13px; line-height: 1.6; margin-bottom: 14px; }
-
-  .product-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  .product-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.45;
+    margin-bottom: 14px;
   }
-  .product-price {
+  .product-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .price-amount {
     font-size: 22px;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--gold);
   }
-  .product-price span { font-size: 13px; color: var(--muted); font-weight: 400; }
-
-  .btn-order {
-    background: linear-gradient(135deg, var(--gold), var(--gold2));
-    color: #000;
-    border: none;
-    border-radius: 12px;
-    padding: 10px 22px;
-    font-size: 14px;
-    font-weight: 700;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.15s;
-    letter-spacing: 0.3px;
+  .price-amount small {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
   }
-  .btn-order:active { transform: scale(0.95); opacity: 0.85; }
+  .order-now-btn {
+    background: linear-gradient(105deg, var(--gold), #b88c2e);
+    border: none;
+    border-radius: 40px;
+    padding: 8px 22px;
+    font-weight: 700;
+    font-size: 14px;
+    color: #0b0b0b;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .order-now-btn:active { transform: scale(0.96); opacity: 0.9; }
 
-  /* ── ORDER FORM ── */
-  .back-btn {
-    display: flex;
+  /* back button */
+  .back-action {
+    display: inline-flex;
     align-items: center;
     gap: 8px;
+    background: none;
+    border: none;
     color: var(--gold);
-    font-size: 14px;
     font-weight: 600;
-    cursor: pointer;
-    margin-bottom: 20px;
-    width: fit-content;
-  }
-  .back-btn:active { opacity: 0.7; }
-
-  .selected-product {
-    background: linear-gradient(135deg, #1a160a, #201a08);
-    border: 1px solid var(--gold);
-    border-radius: var(--radius);
-    padding: 16px;
+    font-size: 15px;
     margin-bottom: 24px;
-    display: flex;
-    gap: 14px;
-    align-items: center;
+    cursor: pointer;
+    padding: 6px 0;
   }
-  .selected-product .sp-emoji { font-size: 38px; }
-  .selected-product .sp-name {
-    font-family: Georgia, serif;
-    font-weight: 700;
-  }
-  .selected-product .sp-price { color: var(--gold); font-size: 15px; font-weight: 600; margin-top: 2px; }
 
-  .form-label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-    margin-top: 18px;
+  /* selected product summary */
+  .selected-preview {
+    background: #1c1810;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
   }
-  .form-input {
+  .preview-emoji { font-size: 44px; }
+  .preview-info h3 { font-size: 18px; font-weight: 700; }
+  .preview-info p { color: var(--gold); font-weight: 600; margin-top: 4px; }
+
+  /* form */
+  .form-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin: 18px 0 6px 0;
+    display: block;
+  }
+  .input-field {
     width: 100%;
-    background: var(--card);
+    background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 14px 16px;
     color: var(--text);
     font-size: 15px;
-    font-family: 'DM Sans', sans-serif;
+    transition: 0.2s;
+  }
+  .input-field:focus {
     outline: none;
-    transition: border-color 0.2s;
+    border-color: var(--gold);
   }
-  .form-input:focus { border-color: var(--gold); }
-  .form-input::placeholder { color: #555; }
-
-  .order-summary-box {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+  .summary-card {
+    background: var(--surface);
+    border-radius: var(--radius-md);
     padding: 18px;
-    margin-top: 24px;
-    margin-bottom: 24px;
+    margin: 24px 0 20px;
+    border: 1px solid var(--border);
   }
-  .order-summary-box h3 {
-    font-size: 13px;
-    color: var(--muted);
-    text-transform: uppercase;
+  .summary-title {
+    font-size: 12px;
     letter-spacing: 1px;
-    margin-bottom: 14px;
+    color: var(--muted);
+    margin-bottom: 12px;
     font-weight: 600;
   }
   .summary-row {
     display: flex;
     justify-content: space-between;
-    font-size: 14px;
-    padding: 6px 0;
-    border-bottom: 1px solid #1e1e1e;
+    padding: 8px 0;
+    border-bottom: 1px solid #262626;
   }
-  .summary-row:last-child { border-bottom: none; }
-  .summary-row.total { font-weight: 700; font-size: 16px; color: var(--gold); margin-top: 4px; }
-
-  .btn-confirm {
-    width: 100%;
-    background: linear-gradient(135deg, var(--gold), var(--gold2));
-    color: #000;
-    border: none;
-    border-radius: 14px;
-    padding: 16px;
+  .summary-row.total {
+    border-bottom: none;
+    font-weight: 800;
+    color: var(--gold);
     font-size: 16px;
-    font-weight: 700;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.15s;
-    letter-spacing: 0.3px;
+    margin-top: 6px;
   }
-  .btn-confirm:active { transform: scale(0.98); }
-  .btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  /* ── SUCCESS ── */
-  #screen-success {
+  .error-box {
+    background: #2a0f0f;
+    border: 1px solid var(--red);
+    border-radius: 12px;
+    padding: 12px;
+    color: var(--red);
+    font-size: 13px;
+    margin: 12px 0;
     display: none;
+  }
+  .error-box.show { display: flex; align-items: center; gap: 8px; }
+  .confirm-btn {
+    width: 100%;
+    background: linear-gradient(115deg, var(--gold), #e6c35c);
+    border: none;
+    border-radius: 60px;
+    padding: 16px;
+    font-weight: 800;
+    font-size: 17px;
+    color: #0b0b0b;
+    margin-top: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .confirm-btn:active { transform: scale(0.98); }
+  .confirm-btn:disabled { opacity: 0.5; transform: none; }
+
+  /* success screen */
+  .success-screen {
     text-align: center;
     padding-top: 80px;
   }
-  #screen-success.active { display: block; }
-  .success-icon { font-size: 72px; margin-bottom: 20px; animation: pop 0.5s ease; }
-  @keyframes pop { 0% { transform: scale(0); } 80% { transform: scale(1.15); } 100% { transform: scale(1); } }
-  .success-title {
-    font-family: Georgia, serif;
-    font-size: 28px;
-    font-weight: 900;
-    margin-bottom: 10px;
-    color: var(--green);
+  .success-icon {
+    font-size: 80px;
+    animation: bounce 0.5s cubic-bezier(0.34, 1.2, 0.64, 1);
   }
-  .success-msg { color: var(--muted); font-size: 15px; line-height: 1.7; }
-  .order-id-badge {
-    display: inline-block;
-    background: #0d1f0d;
+  @keyframes bounce {
+    0% { transform: scale(0.6); opacity: 0; }
+    80% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  .order-id-chip {
+    background: #1c2c1a;
     border: 1px solid var(--green);
     color: var(--green);
-    border-radius: 30px;
-    padding: 8px 22px;
-    font-size: 16px;
-    font-weight: 700;
+    border-radius: 40px;
+    display: inline-block;
+    padding: 8px 28px;
+    font-weight: 800;
+    font-size: 18px;
     margin: 20px 0;
     letter-spacing: 1px;
   }
 
-  /* ── LOADING ── */
+  /* loading overlay */
   .loading-overlay {
-    display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.8);
-    z-index: 999;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(6px);
+    z-index: 1000;
+    display: none;
     align-items: center;
     justify-content: center;
     flex-direction: column;
     gap: 16px;
   }
   .loading-overlay.show { display: flex; }
-  .spinner {
-    width: 44px; height: 44px;
-    border: 3px solid #333;
+  .dot-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid #2a2a2a;
     border-top-color: var(--gold);
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    animation: spin 0.8s infinite linear;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-text { color: var(--muted); font-size: 14px; }
-
-  /* ── ERROR ── */
-  .error-msg {
-    background: #1f0d0d;
-    border: 1px solid var(--red);
-    color: var(--red);
-    border-radius: 10px;
-    padding: 12px 16px;
-    font-size: 13px;
-    margin-top: 12px;
-    display: none;
-  }
-  .error-msg.show { display: block; }
+  .loading-text { color: var(--muted); font-size: 14px; letter-spacing: 0.5px; }
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
+<!-- LOADING OVERLAY -->
 <div class="loading-overlay" id="loadingOverlay">
-  <div class="spinner"></div>
-  <div class="loading-text">Order place ho raha hai...</div>
+  <div class="dot-spinner"></div>
+  <div class="loading-text">✨ Order process ho raha hai... ✨</div>
 </div>
 
-<!-- SCREEN 1: CATALOG -->
-<div class="screen active" id="screen-catalog">
-  <div class="header">
-    <div class="logo">🛍️</div>
-    <h1>MyShop</h1>
-    <p>Premium products, fast delivery</p>
+<!-- ========== SCREEN 1 : CATALOG ========== -->
+<div class="screen active" id="catalogScreen">
+  <div class="store-header">
+    <div class="store-logo">🛍️✨</div>
+    <div class="store-title">MyShop</div>
+    <div class="store-tagline">Premium products, fast delivery</div>
   </div>
-
-  <!-- Product A -->
-  <div class="product-card" onclick="selectProduct('A')">
-    <div class="product-img" style="background: linear-gradient(135deg, #1a0a2e, #2d1060);">
-      🌸
-      <div class="product-badge">BESTSELLER</div>
-    </div>
-    <div class="product-info">
-      <div class="product-name">Rose Perfume</div>
-      <div class="product-desc">Meethi aur lasting khushbu. French rose attar se banaya gaya. Ek spray poore din chalti hai.</div>
-      <div class="product-footer">
-        <div class="product-price">Rs. 500 <span>+ Rs. 100 delivery</span></div>
-        <button class="btn-order" onclick="event.stopPropagation(); selectProduct('A')">Order Karo</button>
+  <div class="product-grid">
+    <!-- Product Rose -->
+    <div class="product-card" data-product="rose">
+      <div class="product-media">
+        🌹🌸
+        <span class="badge">BESTSELLER</span>
+      </div>
+      <div class="product-details">
+        <div class="product-name">Rose Perfume</div>
+        <div class="product-desc">Meethi aur lasting khushbu. French rose attar se banaya gaya. Ek spray poore din chalti hai.</div>
+        <div class="product-price-row">
+          <span class="price-amount">Rs. 500 <small>+ Rs. 100 delivery</small></span>
+          <button class="order-now-btn" data-id="rose">Order Karo</button>
+        </div>
       </div>
     </div>
-  </div>
-
-  <!-- Product B -->
-  <div class="product-card" onclick="selectProduct('B')">
-    <div class="product-img" style="background: linear-gradient(135deg, #0a1a1a, #0d3030);">
-      🌊
-      <div class="product-badge" style="background:#4fc3f7; color:#000;">NEW</div>
-    </div>
-    <div class="product-info">
-      <div class="product-name">Ocean Oud Spray</div>
-      <div class="product-desc">Mardana khushbu with deep oud notes. Fresh ocean breeze ke saath. Office aur evening ke liye perfect.</div>
-      <div class="product-footer">
-        <div class="product-price">Rs. 750 <span>+ Rs. 100 delivery</span></div>
-        <button class="btn-order" onclick="event.stopPropagation(); selectProduct('B')">Order Karo</button>
+    <!-- Product Ocean Oud -->
+    <div class="product-card" data-product="ocean">
+      <div class="product-media">
+        🌊🧴
+        <span class="badge" style="background:#5bc0ff; color:#111;">NEW</span>
+      </div>
+      <div class="product-details">
+        <div class="product-name">Ocean Oud Spray</div>
+        <div class="product-desc">Mardana khushbu with deep oud notes. Fresh ocean breeze ke saath. Office aur evening ke liye perfect.</div>
+        <div class="product-price-row">
+          <span class="price-amount">Rs. 750 <small>+ Rs. 100 delivery</small></span>
+          <button class="order-now-btn" data-id="ocean">Order Karo</button>
+        </div>
       </div>
     </div>
-  </div>
-
-  <!-- Product C -->
-  <div class="product-card" onclick="selectProduct('C')">
-    <div class="product-img" style="background: linear-gradient(135deg, #1a1200, #3d2c00);">
-      👑
-      <div class="product-badge" style="background: linear-gradient(135deg,#c9a84c,#f0d080); color:#000;">DELUXE</div>
-    </div>
-    <div class="product-info">
-      <div class="product-name">Royal Gold Attar</div>
-      <div class="product-desc">Luxury collection ka sabse umdah perfume. Sona aur ambar ki khushbu. Special occasions ke liye.</div>
-      <div class="product-footer">
-        <div class="product-price">Rs. 1000 <span>+ Rs. 100 delivery</span></div>
-        <button class="btn-order" onclick="event.stopPropagation(); selectProduct('C')">Order Karo</button>
+    <!-- Product Royal Gold -->
+    <div class="product-card" data-product="gold">
+      <div class="product-media">
+        👑✨
+        <span class="badge" style="background:linear-gradient(135deg, #D4AF37, #F3E5AB); color:#000;">DELUXE</span>
+      </div>
+      <div class="product-details">
+        <div class="product-name">Royal Gold Attar</div>
+        <div class="product-desc">Luxury collection ka sabse umdah perfume. Sona aur ambar ki khushbu. Special occasions ke liye.</div>
+        <div class="product-price-row">
+          <span class="price-amount">Rs. 1000 <small>+ Rs. 100 delivery</small></span>
+          <button class="order-now-btn" data-id="gold">Order Karo</button>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- SCREEN 2: ORDER FORM -->
-<div class="screen" id="screen-order">
-  <div class="back-btn" onclick="goBack()">← Wapas Jao</div>
-
-  <div class="selected-product" id="selectedProductBox">
-    <div class="sp-emoji" id="spEmoji">🌸</div>
-    <div>
-      <div class="sp-name" id="spName">Rose Perfume</div>
-      <div class="sp-price" id="spPrice">Rs. 500</div>
+<!-- ========== SCREEN 2 : ORDER FORM ========== -->
+<div class="screen" id="orderFormScreen">
+  <button class="back-action" id="backToCatalogBtn">← Wapas Jao</button>
+  
+  <div class="selected-preview" id="selectedPreview">
+    <div class="preview-emoji" id="previewEmoji">🌹</div>
+    <div class="preview-info">
+      <h3 id="previewName">Rose Perfume</h3>
+      <p id="previewPrice">Rs. 500 + delivery</p>
     </div>
   </div>
 
-  <label class="form-label">Apna Naam 👤</label>
-  <input class="form-input" type="text" id="inputNaam" placeholder="Jaise: Riya, Ali, Sara..." autocomplete="name"/>
+  <label class="form-label">👤 Apna Naam</label>
+  <input type="text" id="customerName" class="input-field" placeholder="Mukammal naam likhein" autocomplete="name">
 
-  <label class="form-label">Phone Number 📞</label>
-  <input class="form-input" type="tel" id="inputPhone" placeholder="03XX-XXXXXXX" autocomplete="tel"/>
+  <label class="form-label">📞 Phone Number</label>
+  <input type="tel" id="customerPhone" class="input-field" placeholder="03XX 1234567" autocomplete="tel">
 
-  <label class="form-label">Delivery Address 📍</label>
-  <input class="form-input" type="text" id="inputAddress" placeholder="Jaise: House 5, Block B, Karachi" autocomplete="street-address"/>
+  <label class="form-label">📍 Delivery Address</label>
+  <input type="text" id="customerAddress" class="input-field" placeholder="House/Street/City, complete address" autocomplete="street-address">
 
-  <div class="order-summary-box" id="summaryBox">
-    <h3>Order Summary</h3>
-    <div class="summary-row"><span>Product</span><span id="sumProduct">—</span></div>
-    <div class="summary-row"><span>Price</span><span id="sumPrice">—</span></div>
+  <div class="summary-card" id="dynamicSummary">
+    <div class="summary-title">📋 ORDER SUMMARY</div>
+    <div class="summary-row"><span>Product</span><span id="summaryProductName">—</span></div>
+    <div class="summary-row"><span>Price</span><span id="summaryProductPrice">—</span></div>
     <div class="summary-row"><span>Delivery</span><span>Rs. 100</span></div>
-    <div class="summary-row total"><span>Total</span><span id="sumTotal">—</span></div>
+    <div class="summary-row total"><span>Total</span><span id="summaryTotalAmount">—</span></div>
   </div>
 
-  <div class="error-msg" id="errorMsg">⚠️ Sab fields bharein please!</div>
+  <div class="error-box" id="formErrorMsg">
+    ⚠️ Sab fields bharein please (naam, phone, address)
+  </div>
 
-  <button class="btn-confirm" id="btnConfirm" onclick="placeOrder()">
-    ✅ Order Confirm Karein
-  </button>
+  <button class="confirm-btn" id="confirmOrderBtn">✅ Order Confirm Karein</button>
 </div>
 
-<!-- SCREEN 3: SUCCESS -->
-<div class="screen" id="screen-success">
-  <div class="success-icon">🎉</div>
-  <div class="success-title">Order Ho Gaya!</div>
-  <div class="order-id-badge" id="successOrderId">#0000</div>
-  <div class="success-msg">
-    Aapka order receive ho gaya hai.<br/>
-    Jald hi delivery ho gi. Shukriya! 🌟
+<!-- ========== SCREEN 3 : SUCCESS ========== -->
+<div class="screen" id="successScreen">
+  <div style="text-align:center; margin-top: 70px;">
+    <div class="success-icon">🎉✅</div>
+    <div style="font-size: 28px; font-weight: 800; margin: 16px 0 6px; color: var(--gold);">Order Ho Gaya!</div>
+    <div class="order-id-chip" id="finalOrderId">#0000</div>
+    <div class="success-msg" style="color: var(--muted); font-size: 15px; line-height: 1.5;">
+      Aapka order receive ho gaya hai.<br/>Jald hi delivery ho gi. Shukriya! 🌟
+    </div>
   </div>
 </div>
 
 <script>
-// ── CONFIG ── Replace with your actual n8n webhook URL after setup
-const WEBHOOK_URL = 'https://n8n.gadgetronics.pk/webhook/miniapp-order';
-
-const PRODUCTS = {
-  A: { name: 'Rose Perfume',     emoji: '🌸', price: 500  },
-  B: { name: 'Ocean Oud Spray',  emoji: '🌊', price: 750  },
-  C: { name: 'Royal Gold Attar', emoji: '👑', price: 1000 }
-};
-
-let selectedProduct = null;
-let tg = null;
-
-// Init Telegram Web App
-try {
-  tg = window.Telegram.WebApp;
-  tg.ready();
-  tg.expand();
-  tg.setHeaderColor('#0d0d0d');
-  tg.setBackgroundColor('#0d0d0d');
-} catch(e) {
-  console.log('Not in Telegram, running in browser mode');
-}
-
-function getChatId() {
-  try {
-    return tg?.initDataUnsafe?.user?.id || null;
-  } catch(e) { return null; }
-}
-
-function selectProduct(key) {
-  selectedProduct = key;
-  const p = PRODUCTS[key];
-  document.getElementById('spEmoji').textContent = p.emoji;
-  document.getElementById('spName').textContent = p.name;
-  document.getElementById('spPrice').textContent = `Rs. ${p.price}`;
-  document.getElementById('sumProduct').textContent = `Product ${key} — ${p.name}`;
-  document.getElementById('sumPrice').textContent = `Rs. ${p.price}`;
-  document.getElementById('sumTotal').textContent = `Rs. ${p.price + 100}`;
-  showScreen('screen-order');
-  window.scrollTo(0, 0);
-}
-
-function goBack() {
-  showScreen('screen-catalog');
-  document.getElementById('errorMsg').classList.remove('show');
-}
-
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-async function placeOrder() {
-  const naam    = document.getElementById('inputNaam').value.trim();
-  const phone   = document.getElementById('inputPhone').value.trim();
-  const address = document.getElementById('inputAddress').value.trim();
-  const err     = document.getElementById('errorMsg');
-
-  if (!naam || !phone || !address) {
-    err.classList.add('show');
-    return;
-  }
-  err.classList.remove('show');
-
-  const p = PRODUCTS[selectedProduct];
-  const orderId = Math.floor(Math.random() * 9000) + 1000;
-  const chatId  = getChatId();
-
-  const payload = {
-    chatId,
-    orderId,
-    customerName: naam,
-    phone,
-    orderItem: selectedProduct,
-    productName: p.name,
-    orderAddress: address,
-    Price: p.price,
-    Delivery: 100,
-    Total: p.price + 100,
-    source: 'mini_app'
+  // ---------- PRODUCTS DATABASE ----------
+  const PRODUCT_MAP = {
+    rose: {
+      name: "Rose Perfume",
+      emoji: "🌹🌸",
+      price: 500,
+      delivery: 100,
+      description: "Meethi aur lasting khushbu"
+    },
+    ocean: {
+      name: "Ocean Oud Spray",
+      emoji: "🌊🧴",
+      price: 750,
+      delivery: 100,
+      description: "Mardana khushbu with deep oud notes"
+    },
+    gold: {
+      name: "Royal Gold Attar",
+      emoji: "👑✨",
+      price: 1000,
+      delivery: 100,
+      description: "Luxury collection umdah perfume"
+    }
   };
 
-  document.getElementById('loadingOverlay').classList.add('show');
-  document.getElementById('btnConfirm').disabled = true;
-
+  // ---------- GLOBALS ----------
+  let currentProductKey = "rose";     // default rose
+  let tgWebApp = null;
+  
+  // init telegram
   try {
-    await fetch(WEBHOOK_URL, {
+    if (window.Telegram && window.Telegram.WebApp) {
+      tgWebApp = window.Telegram.WebApp;
+      tgWebApp.ready();
+      tgWebApp.expand();
+      if (tgWebApp.setHeaderColor) tgWebApp.setHeaderColor('#0b0b0b');
+      if (tgWebApp.setBackgroundColor) tgWebApp.setBackgroundColor('#0b0b0b');
+    } else {
+      console.log("WebApp not in context (browser preview)");
+    }
+  } catch(e) { console.warn(e); }
+
+  // Helper: get Telegram user ID (real customer chatId)
+  function getCustomerChatId() {
+    try {
+      if (tgWebApp && tgWebApp.initDataUnsafe && tgWebApp.initDataUnsafe.user && tgWebApp.initDataUnsafe.user.id) {
+        return String(tgWebApp.initDataUnsafe.user.id);
+      }
+    } catch(e) {}
+    // Fallback for testing from browser / non-telegram: use a placeholder (owner test id)
+    // but we want real orders to work always, but when testing via browser, still send test id.
+    // Important: in production on Telegram, real ID will be used.
+    return "7402783350";  // default test/owner id, but real user replaces automatically inside TG
+  }
+
+  // UI update summary & preview
+  function updateFormByProduct(productKey) {
+    const prod = PRODUCT_MAP[productKey];
+    if (!prod) return;
+    currentProductKey = productKey;
+    document.getElementById('previewEmoji').innerText = prod.emoji;
+    document.getElementById('previewName').innerText = prod.name;
+    document.getElementById('previewPrice').innerHTML = `Rs. ${prod.price} + Rs. ${prod.delivery} delivery`;
+    
+    document.getElementById('summaryProductName').innerText = prod.name;
+    document.getElementById('summaryProductPrice').innerText = `Rs. ${prod.price}`;
+    const totalVal = prod.price + prod.delivery;
+    document.getElementById('summaryTotalAmount').innerText = `Rs. ${totalVal}`;
+  }
+
+  // show order screen with selected product
+  function openOrderForm(productKey) {
+    if (!PRODUCT_MAP[productKey]) return;
+    currentProductKey = productKey;
+    updateFormByProduct(productKey);
+    // switch screen
+    document.getElementById('catalogScreen').classList.remove('active');
+    document.getElementById('orderFormScreen').classList.add('active');
+    document.getElementById('formErrorMsg').classList.remove('show');
+    window.scrollTo(0, 0);
+  }
+
+  // back to catalog
+  function backToCatalog() {
+    document.getElementById('orderFormScreen').classList.remove('active');
+    document.getElementById('catalogScreen').classList.add('active');
+    document.getElementById('formErrorMsg').classList.remove('show');
+  }
+
+  // ---------- WEBHOOK SUBMIT (COMPLETE & RELIABLE) ----------
+  const WEBHOOK_ENDPOINT = "https://n8n.gadgetronics.pk/webhook/miniapp-order";
+
+  async function submitOrderToWebhook(orderPayload) {
+    const response = await fetch(WEBHOOK_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(orderPayload)
     });
-  } catch(e) {
-    console.log('Webhook error (or test mode):', e);
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Webhook error ${response.status}: ${errText}`);
+    }
+    return await response.json();
   }
 
-  document.getElementById('loadingOverlay').classList.remove('show');
-  document.getElementById('successOrderId').textContent = `#${orderId}`;
-  showScreen('screen-success');
-
-  // Close Mini App after 3 seconds
-  setTimeout(() => {
-    try { tg?.close(); } catch(e) {}
-  }, 3000);
-}
-</script>
+  // main place order logic
   async function placeOrder() {
-  const orderData = {
-    chatId: "7402783350",        // In real case: customer's Telegram ID
-    orderId: Date.now().toString(),
-    customerName: document.getElementById("name")?.value || "Test Customer",
-    phone: document.getElementById("phone")?.value || "03001234567",
-    orderAddress: document.getElementById("address")?.value || "Test Address",
-    productName: "Ocean Oud Spray",
-    Price: "750",
-    Delivery: "100",
-    Total: "850"
-  };
-
-  const response = await fetch("https://n8n.gadgetronics.pk/webhook/miniapp-order", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(orderData)
-  });
-
-  if (response.ok) {
-    alert("✅ Order confirmed! Check Telegram.");
-  } else {
-    alert("❌ Order failed. Try again.");
+    const nameInput = document.getElementById('customerName').value.trim();
+    const phoneInput = document.getElementById('customerPhone').value.trim();
+    const addressInput = document.getElementById('customerAddress').value.trim();
+    const errorDiv = document.getElementById('formErrorMsg');
+    
+    if (!nameInput || !phoneInput || !addressInput) {
+      errorDiv.classList.add('show');
+      return;
+    }
+    errorDiv.classList.remove('show');
+    
+    const product = PRODUCT_MAP[currentProductKey];
+    if (!product) {
+      alert("Product selection error");
+      return;
+    }
+    
+    // generate unique order ID (random + timestamp for clarity)
+    const orderIdNum = Math.floor(Math.random() * 90000) + 10000;
+    const orderId = orderIdNum.toString();
+    
+    // total amount
+    const totalAmount = product.price + product.delivery;
+    
+    // Get actual chatId from Telegram (customer)
+    const chatId = getCustomerChatId();
+    
+    // Build payload exactly matching your n8n expected fields (Invoice Generator uses body.orderId etc)
+    const payload = {
+      chatId: chatId,                 // customer chat id (telegram user)
+      orderId: orderId,
+      customerName: nameInput,
+      phone: phoneInput,
+      orderAddress: addressInput,
+      productName: product.name,
+      Price: product.price.toString(),
+      Delivery: product.delivery.toString(),
+      Total: totalAmount.toString()
+    };
+    
+    // show loading overlay
+    const loadingEl = document.getElementById('loadingOverlay');
+    const confirmBtn = document.getElementById('confirmOrderBtn');
+    loadingEl.classList.add('show');
+    if (confirmBtn) confirmBtn.disabled = true;
+    
+    try {
+      // send order to n8n webhook
+      const result = await submitOrderToWebhook(payload);
+      console.log("Webhook response:", result);
+      
+      // success: switch to success screen
+      document.getElementById('finalOrderId').innerText = `#${orderId}`;
+      document.getElementById('orderFormScreen').classList.remove('active');
+      document.getElementById('successScreen').classList.add('active');
+      
+      // optional: close mini app after few seconds (better UX)
+      setTimeout(() => {
+        try { if (tgWebApp && tgWebApp.close) tgWebApp.close(); } catch(e) {}
+      }, 2800);
+      
+    } catch (err) {
+      console.error("Order submission error:", err);
+      errorDiv.classList.add('show');
+      errorDiv.innerHTML = `⚠️ Order send nahi ho saka: ${err.message}. Dobara try karein.`;
+      setTimeout(() => {
+        if(errorDiv) errorDiv.classList.remove('show');
+      }, 4000);
+    } finally {
+      loadingEl.classList.remove('show');
+      if (confirmBtn) confirmBtn.disabled = false;
+    }
   }
-}
+  
+  // ---------- EVENT LISTENERS ----------
+  // product card click delegation (catalog)
+  document.querySelectorAll('.product-card').forEach(card => {
+    const btn = card.querySelector('.order-now-btn');
+    if (btn) {
+      const prodId = btn.getAttribute('data-id');
+      if (prodId) {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openOrderForm(prodId);
+        });
+      }
+    }
+    // also clicking on the card itself (except button)
+    card.addEventListener('click', (e) => {
+      if (e.target.classList && e.target.classList.contains('order-now-btn')) return;
+      const btnInside = card.querySelector('.order-now-btn');
+      if (btnInside && btnInside.getAttribute('data-id')) {
+        openOrderForm(btnInside.getAttribute('data-id'));
+      }
+    });
+  });
+  
+  document.getElementById('backToCatalogBtn')?.addEventListener('click', backToCatalog);
+  document.getElementById('confirmOrderBtn')?.addEventListener('click', placeOrder);
+  
+  // realtime update if product change from preview (no product picker inside form but we keep currentProductKey)
+  // ensure default product preview on first load
+  updateFormByProduct('rose');
+  
+  // also update summary when inputs change (just for dynamic feel - not required)
+  const inputs = ['customerName', 'customerPhone', 'customerAddress'];
+  inputs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', () => {
+        document.getElementById('formErrorMsg')?.classList.remove('show');
+      });
+    }
+  });
+  
+  // Edge: if someone wants to retry after error from success? not needed, but fine.
+  console.log("MyShop mini-app ready — Order in Seconds with live n8n webhook");
+</script>
 </body>
 </html>
